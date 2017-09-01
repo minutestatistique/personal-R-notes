@@ -141,3 +141,90 @@ f_2 <- function(x) {
 f_2(dt)
 dt
 address(dt)
+
+x <- 1:1e6
+y <- x
+object_size(x)
+object_size(y)
+object_size(x, y)
+
+address(x)
+address(y)
+
+x[1] <- 10L
+address(x)
+address(y)
+object_size(x, y)
+
+dt <- data.table(X1 = 1:1e6)
+dt
+address(dt)
+object_size(dt)
+
+f <- function(x) {
+  x[, X2 := X1]
+}
+f(dt)
+dt
+address(dt)
+object_size(dt)
+
+df <- data.frame(X1 = 1:1e6)
+head(df)
+address(df)
+object_size(df)
+
+f <- function(df) {
+  df$X2 <- df$X1
+  df
+}
+df <- f(df)
+head(df)
+address(df)
+object_size(df)
+df$X2[1] <- 10
+
+dt <- data.table(1:1e6)
+dt_2 <- dt
+object_size(dt)
+object_size(dt_2)
+object_size(dt, dt_2)
+
+address(dt)
+address(dt_2)
+
+dt_2[1, V1 := 10L]
+
+dt_2
+dt
+
+address(dt)
+address(dt_2)
+object_size(dt, dt_2)
+
+dt <- data.table(1:5, letters[1:5])
+dt <- data.table(1:5, letters[1:5], LETTERS[1:5])
+address(dt)
+track_dt <- track_copy(dt)
+f <- function(x) {
+  setnames(x, names(x), c("X1", "X2"))
+  x[, X3 := X1]
+}
+track_dt()
+f(dt[, .(V1, V2)])
+f(dt)
+address(dt)
+
+dt <- data.table(1:5, letters[1:5], LETTERS[1:5])
+track_dt <- track_copy(dt)
+track_dt()
+tracemem(dt)
+dt_bis <- dt[, .(V1, V2)]
+dt_bis$V1[1] <- 200
+
+address(dt)
+address(dt_bis)
+
+track_dt <- track_copy(dt)
+track_dt()
+dt_bis[, V4 := V1]
