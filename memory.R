@@ -1,3 +1,54 @@
+source("utils.R")
+
+devtools::install_github("hadley/lineprof")
+
+MyRequire(pryr)
+MyRequire(data.table)
+MyRequire(ggplot2)
+MyRequire(pryr)
+MyRequire(devtools)
+
+object_size(1:10)
+object_size(mean)
+object_size(mtcars)
+
+# zero-length vector with size != 0 & size is not proportionate with length
+sizes <- sapply(0:50, function(n) object_size(seq_len(n)))
+plot(0:50, sizes, xlab = "Length", ylab = "Size (bytes)", type = "s")
+
+# zero-length vector size
+object_size(numeric())
+object_size(logical())
+object_size(raw())
+object_size(list())
+
+plot(0:50, sizes - 40, xlab = "Length", ylab = "Bytes excluding overhead", type = "n")
+abline(h = 0, col = "grey80")
+abline(h = c(8, 16, 32, 48, 64, 128), col = "grey80")
+abline(a = 0, b = 4, col = "grey90", lwd = 4)
+lines(sizes - 40, type = "s")
+
+# shared components
+x <- 1:1e6
+object_size(x)
+
+y <- list(x, x, x)
+object_size(y)
+
+object_size(x, y)
+
+# no sharing
+x1 <- 1:1e6
+y1 <- list(1:1e6, 1:1e6, 1:1e6)
+object_size(x1)
+object_size(y1)
+object_size(x1, y1)
+object_size(x1) + object_size(y1) == object_size(x1, y1)
+
+# strings pool
+object_size("banana")
+object_size(rep("banana", 10))
+
 # memory usage & garbage collection
 mem_used()
 
