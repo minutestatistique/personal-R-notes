@@ -90,7 +90,7 @@ if (!dir.exists("data")) {
 }
 write.csv(diamonds, "data/diamonds.csv", row.names = FALSE)
 
-source("code/read-delim.R")
+source("src/R/read-delim.R")
 prof <- lineprof(read_delim("data/diamonds.csv"))
 shine(prof)
 
