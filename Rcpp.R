@@ -101,3 +101,30 @@ rowSums(x)
 rowSumsC(x)
 
 ### using sourceCpp
+Rcpp::sourceCpp('src/cpp/mean.cpp')
+
+### missing values
+Rcpp::sourceCpp('src/cpp/scalar_missings.cpp')
+str(scalar_missings())
+
+evalCpp("NAN == 1")
+evalCpp("NAN < 1")
+evalCpp("NAN > 1")
+evalCpp("NAN == NAN")
+
+evalCpp("NAN && TRUE")
+evalCpp("NAN || FALSE")
+
+evalCpp("NAN + 1")
+evalCpp("NAN - 1")
+evalCpp("NAN / 1")
+evalCpp("NAN * 1")
+
+Rcpp::sourceCpp('src/cpp/missing_sampler.cpp')
+str(missing_sampler())
+
+Rcpp::sourceCpp('src/cpp/is_na.cpp')
+is_naC(c(NA, 5.4, 3.2, NA))
+is_naC2(c(NA, 5.4, 3.2, NA))
+
+### Rcpp sugar
