@@ -128,3 +128,121 @@ is_naC(c(NA, 5.4, 3.2, NA))
 is_naC2(c(NA, 5.4, 3.2, NA))
 
 ### Rcpp sugar
+# arithmetic and logical operators
+pdistR <- function(x, ys) {
+  sqrt((x - ys) ^ 2)
+}
+
+Rcpp::sourceCpp('src/cpp/sugar.cpp')
+
+set.seed(12345)
+y <- rnorm(1e6)
+x <- mean(y)
+microbenchmark(
+  pdistR = pdistR(x, y),
+  pdistC2 = pdistC2(x, y)
+)
+
+# logical summary functions
+any_naR <- function(x) any(is.na(x))
+
+Rcpp::sourceCpp('src/cpp/sugar.cpp')
+
+x0 <- runif(1e5)
+x1 <- c(x0, NA)
+x2 <- c(NA, x0)
+
+microbenchmark(
+  any_naR(x0), any_naC(x0),
+  any_naR(x1), any_naC(x1),
+  any_naR(x2), any_naC(x2)
+)
+
+### the STL
+# using iterators
+Rcpp::sourceCpp('src/cpp/the_stl.cpp')
+
+# algorithms
+Rcpp::sourceCpp('src/cpp/the_stl.cpp')
+
+# vectors
+Rcpp::sourceCpp('src/cpp/the_stl.cpp')
+
+# sets
+Rcpp::sourceCpp('src/cpp/the_stl.cpp')
+
+# maps
+Rcpp::sourceCpp('src/cpp/the_stl.cpp')
+
+### case studies
+# Gibbs sampler
+gibbs_r <- function(N, thin) {
+  mat <- matrix(nrow = N, ncol = 2)
+  x <- y <- 0
+  
+  for (i in 1:N) {
+    for (j in 1:thin) {
+      x <- rgamma(1, 3, y * y + 4)
+      y <- rnorm(1, 1 / (x + 1), 1 / sqrt(2 * (x + 1)))
+    }
+    mat[i, ] <- c(x, y)
+  }
+  mat
+}
+
+Rcpp::sourceCpp('src/cpp/gibbs.cpp')
+
+microbenchmark(
+  gibbs_r(100, 10),
+  gibbs_cpp(100, 10)
+)
+
+# R vectorisation vs. C++ vectorisation
+vacc1a <- function(age, female, ily) {
+  p <- 0.25 + 0.3 * 1 / (1 - exp(0.04 * age)) + 0.1 * ily
+  p <- p * if (female) 1.25 else 0.75
+  p <- max(0, p)
+  p <- min(1, p)
+  p
+}
+
+vacc1 <- function(age, female, ily) {
+  n <- length(age)
+  out <- numeric(n)
+  for (i in seq_len(n)) {
+    out[i] <- vacc1a(age[i], female[i], ily[i])
+  }
+  out
+}
+
+vacc2 <- function(age, female, ily) {
+  p <- 0.25 + 0.3 * 1 / (1 - exp(0.04 * age)) + 0.1 * ily
+  p <- p * ifelse(female, 1.25, 0.75)
+  p <- pmax(0, p)
+  p <- pmin(1, p)
+  p
+}
+
+Rcpp::sourceCpp('src/cpp/vacc3.cpp')
+
+n <- 1000
+age <- rnorm(n, mean = 50, sd = 10)
+female <- sample(c(T, F), n, rep = TRUE)
+ily <- sample(c(T, F), n, prob = c(0.8, 0.2), rep = TRUE)
+
+stopifnot(
+  all.equal(vacc1(age, female, ily), vacc2(age, female, ily)),
+  all.equal(vacc1(age, female, ily), vacc3(age, female, ily))
+)
+
+microbenchmark(
+  vacc1 = vacc1(age, female, ily),
+  vacc2 = vacc2(age, female, ily),
+  vacc3 = vacc3(age, female, ily)
+)
+
+### using Rcpp in a package
+# Rcpp.package.skeleton("NewPackage", attributes = TRUE)
+
+# Rcpp.package.skeleton("NewPackage", example_code = FALSE,
+#                       cpp_files = c("convolve.cpp"))
