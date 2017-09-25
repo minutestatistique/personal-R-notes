@@ -101,3 +101,4 @@ rowSums(x)
 rowSumsC(x)
 
 ### using sourceCpp
+sourceCpp('src/cpp/mean.cpp')
