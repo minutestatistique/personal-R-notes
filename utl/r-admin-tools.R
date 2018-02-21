@@ -50,7 +50,7 @@ hist_db[, DateTime := as.POSIXct(epoch / 1000., origin = "1970-01-01",
 hist_db[, Date := date(DateTime)]
 
 # file operations
-file_ops <- hist_db[grepl("file.", history, fixed = TRUE), ]
+file_ops <- hist_db[grepl("file\\.|zip\\(|tar\\(", history, perl = TRUE), ]
 out_file <- paste(format(Sys.time(), "%Y-%m-%d_%H%M%S"),
                   "file_ops", myUser, sep = "_")
 save(file_ops, file = file.path(myOutPath, out_file))
